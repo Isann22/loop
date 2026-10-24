@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f1e9">
+  <title>Python Loop Visualizer</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <div class="app">
+    <header class="hero">
+      <div class="brand"><span class="brand-symbol" aria-hidden="true">↻</span><span>Python Loop Visualizer</span></div>
+      <div class="hero-content"><p class="eyebrow">ALUR EKSEKUSI PYTHON</p><h1>Lihat loop bekerja,<br><em>selangkah demi selangkah.</em></h1><p>Amati nilai variabel, baris kode, dan hasil <code>print()</code> pada setiap langkah.</p></div>
+      <div class="hero-aside">Dibuat untuk belajar bersama di kelas.<br>Ubah input, lalu jalankan simulasinya.</div>
+    </header>
+    <main>
+      <nav class="tabs" role="tablist" aria-label="Jenis loop">
+        <button class="tab active" id="tab-for" type="button" role="tab" aria-selected="true" aria-controls="workspace" data-tab="for"><span>01</span> For Loop</button>
+        <button class="tab" id="tab-while" type="button" role="tab" aria-selected="false" aria-controls="workspace" data-tab="while" tabindex="-1"><span>02</span> While Loop</button>
+        <button class="tab" id="tab-nested" type="button" role="tab" aria-selected="false" aria-controls="workspace" data-tab="nested" tabindex="-1"><span>03</span> Nested Loop</button>
+      </nav>
+      <section class="workspace" id="workspace" role="tabpanel" aria-labelledby="tab-for">
+        <div class="section-head"><div><p class="eyebrow" id="topic-kicker">01 / FOR LOOP</p><h2 id="topic-title">Ambil satu per satu</h2><p id="topic-description">Python mengambil nilai dari sumber, lalu menjalankan isi loop untuk setiap nilai.</p></div><div class="status" id="status" role="status" aria-live="polite"><span class="status-dot" aria-hidden="true"></span><span id="status-text">Siap</span></div></div>
+        <div class="top-grid">
+          <section class="panel settings" aria-labelledby="settings-title"><div class="panel-head"><span class="panel-index">A</span><h3 id="settings-title">Pengaturan input</h3></div><div id="settings-fields"></div><p class="input-hint" id="input-hint"></p></section>
+          <section class="panel code-panel" aria-labelledby="code-title"><div class="panel-head"><span class="panel-index">B</span><h3 id="code-title">Kode Python</h3><span class="live-label">Mengikuti input</span></div><div class="code-wrap"><div class="code-lines" id="code" aria-label="Kode Python"></div></div><p class="code-caption">Baris yang dijalankan akan disorot.</p></section>
+        </div>
+        <section class="controls" aria-label="Kontrol simulasi"><div class="control-buttons"><button class="button primary" type="button" id="play"><span aria-hidden="true">▶</span> Mulai / Lanjutkan</button><button class="button" type="button" id="pause"><span aria-hidden="true">Ⅱ</span> Jeda</button><button class="button" type="button" id="step"><span aria-hidden="true">→</span> Langkah Berikutnya</button><button class="button quiet" type="button" id="reset"><span aria-hidden="true">↺</span> Reset</button></div><label class="speed-control" for="speed">Kecepatan <select id="speed"><option value="1400">Lambat</option><option value="850" selected>Sedang</option><option value="400">Cepat</option></select></label></section>
+        <div class="bottom-grid"><section class="panel visual-panel" aria-labelledby="visual-title"><div class="panel-head"><span class="panel-index">C</span><h3 id="visual-title">Visualisasi</h3></div><div id="visual"></div></section><div class="right-stack"><section class="panel state-panel" aria-labelledby="state-title"><div class="panel-head"><span class="panel-index">D</span><h3 id="state-title">Nilai variabel</h3></div><div id="variables" class="variables"></div><div id="counters" class="counters"></div></section><section class="panel output-panel" aria-labelledby="output-title"><div class="panel-head"><span class="panel-index">E</span><h3 id="output-title">Output <span class="muted">print()</span></h3><span class="output-count" id="output-count">0 kali</span></div><div id="output" class="output" aria-live="polite"></div></section></div></div>
+        <section class="explanation" aria-live="polite"><span class="explanation-mark" aria-hidden="true">↳</span><div><p class="eyebrow">LANGKAH SAAT INI</p><p id="explanation-text">Atur input, lalu jalankan simulasi untuk melihat alurnya.</p></div><span class="step-count" id="step-count">Langkah 0</span></section>
+      </section>
+    </main>
+    <footer>Python Loop Visualizer <span>·</span> Belajar dengan melihat alurnya</footer>
+  </div>
+</body>
+</html>
