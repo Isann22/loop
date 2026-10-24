@@ -11,7 +11,7 @@ const defaults = {
   nested: { outerMode: 'number', outerStart: '1', outerStop: '3', outerStep: '1', outerText: 'AB', innerMode: 'string', innerStart: '1', innerStop: '3', innerStep: '1', innerText: 'AB' }
 };
 const configs = structuredClone(defaults);
-const els = Object.fromEntries(['settings-fields','code','visual','output','step-description','status','status-text','workspace','play','pause','step','reset','speed'].map(id => [id, document.getElementById(id)]));
+const els = Object.fromEntries(['settings-fields','code','active-values','step-description','status','status-text','workspace','play','pause','step','reset','speed'].map(id => [id, document.getElementById(id)]));
 let tab = 'for';
 let machine = null;
 let iterator = null;
@@ -28,13 +28,6 @@ function pyString(value) {
 }
 function shown(value, isString = false) {
   return isString ? pyString(value) : String(value);
-}
-function cardValue(value) {
-  if (value === ' ') return '␠';
-  if (value === '\n') return '↵';
-  if (value === '\t') return '⇥';
-  if (value === '\r') return '⏎';
-  return String(value);
 }
 function safeNumber(raw) {
   const text = String(raw).trim();
@@ -155,7 +148,7 @@ function* forTrace(m, c, source) {
     yield outcome(0, `${name} mengambil ${formatValue(value, source)}. Iterasi ke-${m.counters.iter} dimulai.`);
     if (m.outputs.length >= MAX_PRINTS) { yield limitEvent(1); return; }
     m.outputs.push(String(value)); m.counters.prints++;
-    yield outcome(1, `print(${name}) menambahkan ${formatValue(value, source)} ke output.`);
+    yield outcome(1, `print(${name}) mencetak ${formatValue(value, source)}.`);
   }
   m.active.main = null; m.processed.main = source.values.length;
   if (source.truncated) yield limitEvent(0);
@@ -270,74 +263,34 @@ function pause() {
 }
 function step() { if (playing) pause(); runStep(); }
 
-function addText(parent, tag, text, className = '') {
-  const element = document.createElement(tag); element.textContent = text; if (className) element.className = className; parent.append(element); return element;
+function activeText(value, isString) {
+  if (value === undefined) return '—';
+  if (!isString) return String(value);
+  if (value === ' ') return '"␠"';
+  if (value === '\n') return '"↵"';
+  if (value === '\t') return '"⇥"';
+  return pyString(value);
 }
-function addOverflowMark(parent, label) {
-  const mark = addText(parent, 'span', '…', 'overflow-mark');
-  mark.setAttribute('aria-label', label);
+function activeSlot(label, value, isString = false, tone = '') {
+  const slot = document.createElement('div');
+  slot.className = `active-slot ${tone}${value === undefined ? ' empty' : ''}`;
+  const name = document.createElement('span'); name.className = 'active-name'; name.textContent = label;
+  const number = document.createElement('strong'); number.className = 'active-number'; number.textContent = activeText(value, isString);
+  slot.append(name, number); els['active-values'].append(slot);
 }
-function sourcePanel(source, key, title, active, processed) {
-  const panel = document.createElement('div'); panel.className = `source-panel ${key}`;
-  const head = addText(panel, 'div', '', 'source-head');
-  addText(head, 'strong', title);
-  addText(head, 'span', `${source.values.length}${source.truncated ? '+' : ''} nilai tersedia`);
-  if (!source.values.length) addText(panel, 'div', 'Sumber kosong · 0 iterasi', 'empty-source');
-  else {
-    const cards = addText(panel, 'div', '', 'cards');
-    const focus = active === null ? Math.min(processed, source.values.length - 1) : active;
-    const first = Math.max(0, Math.min(source.values.length - 3, focus - 1));
-    const last = Math.min(source.values.length, first + 3);
-    if (first > 0) addOverflowMark(cards, 'Ada nilai sebelumnya yang tidak ditampilkan');
-    for (let index = first; index < last; index++) {
-      const value = source.values[index];
-      const state = index === active ? 'active' : index < processed ? 'done' : 'pending';
-      const card = addText(cards, 'div', '', `item-card ${state}`);
-      if (source.indexed) addText(card, 'span', `indeks ${index}`, 'item-index');
-      addText(card, 'span', cardValue(value), 'value');
-      addText(card, 'span', state === 'active' ? 'Sedang aktif' : state === 'done' ? 'Selesai' : 'Menunggu', 'card-state');
-    }
-    if (last < source.values.length) addOverflowMark(cards, 'Ada nilai berikutnya yang tidak ditampilkan');
-  }
-  if (source.kind === 'number' && source.stop !== null) addText(panel, 'div', `Stop = ${source.stop} · batas berhenti, tidak ikut dihasilkan`, 'stop-marker');
-  if (source.truncated) addText(panel, 'p', `Sumber lebih dari ${MAX_ITEMS} nilai. Simulasi berhenti pada batas.`, 'limit-note');
-  return panel;
-}
-function renderVisual() {
-  els.visual.replaceChildren();
-  const c = configs[tab], s = validation.sources;
-  if (tab === 'for') {
-    els.visual.append(sourcePanel(s.main,'main',c.mode === 'string' ? 'Karakter dalam teks' : 'Nilai dari range()',machine.active.main,machine.processed.main));
-  } else if (tab === 'nested') {
-    els.visual.append(sourcePanel(s.outer,'outer','Loop luar · i',machine.active.outer,machine.processed.outer));
-    els.visual.append(sourcePanel(s.inner,'inner','Loop dalam · j',machine.active.inner,machine.processed.inner));
-  } else if (c.mode === 'string') {
-    const source = { kind:'string',values:Array.from(c.text).slice(0,MAX_ITEMS),truncated:Array.from(c.text).length>MAX_ITEMS,indexed:true };
-    els.visual.append(sourcePanel(source,'main','Karakter teks',machine.active.main,machine.processed.main));
+function renderActiveValues() {
+  els['active-values'].replaceChildren();
+  const c = configs[tab], v = machine.vars;
+  if (tab === 'for') activeSlot(c.mode === 'string' ? 'karakter' : 'i', v[c.mode === 'string' ? 'karakter' : 'i'], c.mode === 'string');
+  else if (tab === 'while' && c.mode === 'number') activeSlot('i', v.i);
+  else if (tab === 'while') {
+    activeSlot('indeks', v.indeks);
+    const character = machine.active.main === null || v.teks === undefined ? undefined : Array.from(v.teks)[machine.active.main];
+    activeSlot('teks[indeks]', character, true, 'secondary');
   } else {
-    const panel = document.createElement('div'); panel.className = 'source-panel main';
-    addText(panel, 'strong', 'Nilai i yang diperiksa');
-    if (!machine.history.length) addText(panel,'div','Belum ada pemeriksaan kondisi.','empty-source');
-    else {
-      const cards = addText(panel,'div','','cards');
-      if (machine.history.length > 3) addOverflowMark(cards, 'Ada pemeriksaan sebelumnya yang tidak ditampilkan');
-      machine.history.slice(-3).forEach(entry => {
-        const card = addText(cards,'div','',`item-card ${entry.state === 'false' ? 'done' : entry.state}`);
-        addText(card,'span',String(entry.value),'value');
-        addText(card,'span',entry.state === 'false' ? 'False · berhenti' : entry.state === 'done' ? 'Selesai' : 'Sedang aktif','card-state');
-      });
-    }
-    els.visual.append(panel);
+    activeSlot('i · loop luar', v.i, c.outerMode === 'string', 'outer');
+    activeSlot('j · loop dalam', machine.active.inner === null ? undefined : v.j, c.innerMode === 'string', 'inner');
   }
-  if (machine.condition) addText(els.visual, 'div', `${machine.condition.expression} → ${machine.condition.result ? 'True' : 'False'}`, `condition-box ${machine.condition.result ? 'true' : 'false'}`);
-}
-function renderOutput() {
-  els.output.replaceChildren();
-  if (!machine.outputs.length) addText(els.output,'div','Belum ada output.','output-empty');
-  else machine.outputs.forEach(value => {
-    const row = addText(els.output,'div','','output-row'); addText(row,'span',value,'printed');
-  });
-  els.output.scrollTop = els.output.scrollHeight;
 }
 function renderStatus() {
   const labels = { ready:'Siap',playing:'Berjalan',paused:'Jeda',finished:'Pengulangan selesai',limited:'Batas simulasi tercapai',invalid:'Input perlu diperbaiki' };
@@ -347,7 +300,7 @@ function renderStatus() {
   els.pause.disabled = !playing;
   els.step.disabled = !iterator || status === 'finished' || status === 'limited';
 }
-function renderAll() { renderCode(); renderVisual(); renderOutput(); renderStatus(); }
+function renderAll() { renderCode(); renderActiveValues(); renderStatus(); }
 function updateTopic() {
   els.workspace.setAttribute('aria-labelledby',`tab-${tab}`);
   document.querySelectorAll('.tab').forEach(button => { const selected = button.dataset.tab === tab; button.classList.toggle('active',selected); button.setAttribute('aria-selected',String(selected)); button.tabIndex = selected ? 0 : -1; });
