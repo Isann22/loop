@@ -11,12 +11,7 @@ const defaults = {
   nested: { outerMode: 'number', outerStart: '1', outerStop: '3', outerStep: '1', outerText: 'AB', innerMode: 'string', innerStart: '1', innerStop: '3', innerStep: '1', innerText: 'AB' }
 };
 const configs = structuredClone(defaults);
-const topics = {
-  for: ['01 / FOR LOOP', 'Ambil satu per satu', 'Python mengambil nilai dari sumber, lalu menjalankan isi loop untuk setiap nilai.'],
-  while: ['02 / WHILE LOOP', 'Periksa, lalu ulangi', 'Isi loop berjalan selama kondisi bernilai True. Kondisi diperiksa kembali setelah perubahan.'],
-  nested: ['03 / NESTED LOOP', 'Loop di dalam loop', 'Untuk setiap nilai i, loop dalam menelusuri seluruh nilai j dari awal.']
-};
-const els = Object.fromEntries(['settings-fields','input-hint','code','visual','variables','counters','output','output-count','explanation-text','step-count','status','status-text','topic-kicker','topic-title','topic-description','workspace','play','pause','step','reset','speed'].map(id => [id, document.getElementById(id)]));
+const els = Object.fromEntries(['settings-fields','code','visual','output','step-description','status','status-text','workspace','play','pause','step','reset','speed'].map(id => [id, document.getElementById(id)]));
 let tab = 'for';
 let machine = null;
 let iterator = null;
@@ -24,7 +19,7 @@ let playing = false;
 let timer = null;
 let stepNumber = 0;
 let currentLine = -1;
-let currentMessage = 'Atur input, lalu jalankan simulasi untuk melihat alurnya.';
+let currentMessage = 'Pilih input, lalu jalankan simulasi.';
 let status = 'ready';
 let validation = { errors: {}, sources: {} };
 
@@ -67,15 +62,15 @@ function sourceFields(prefix, mode, heading) {
   const step = prefix ? `${prefix}Step` : 'step';
   const text = prefix ? `${prefix}Text` : 'text';
   const label = prefix === 'outer' ? 'outer' : prefix === 'inner' ? 'inner' : '';
-  return `<div class="setting-group"><p class="group-title ${label}">${heading}</p><div class="settings-grid two">${field(key, 'Sumber', 'select', [['number','Angka: range()'],['string','String: karakter']])}</div>${mode === 'number' ? `<div class="settings-grid">${field(start, 'Start')}${field(stop, 'Stop')}${field(step, 'Step')}</div>` : `<div class="settings-grid">${field(text, 'Teks', 'textarea', null, true)}</div>`}</div>`;
+  return `<div class="setting-group">${heading ? `<p class="group-title ${label}">${heading}</p>` : ''}<div class="settings-grid two">${field(key, 'Sumber', 'select', [['number','Angka: range()'],['string','String: karakter']])}</div>${mode === 'number' ? `<div class="settings-grid">${field(start, 'Start')}${field(stop, 'Stop')}${field(step, 'Step')}</div>` : `<div class="settings-grid">${field(text, 'Teks', 'textarea', null, true)}</div>`}</div>`;
 }
 function renderSettings() {
   const c = configs[tab];
-  if (tab === 'for') els['settings-fields'].innerHTML = sourceFields('', c.mode, 'Pilih sumber nilai');
+  els['settings-fields'].className = tab === 'nested' ? 'nested-settings' : '';
+  if (tab === 'for') els['settings-fields'].innerHTML = sourceFields('', c.mode, '');
   if (tab === 'while') els['settings-fields'].innerHTML = `<div class="settings-grid two">${field('mode','Mode','select',[['number','Kondisi angka'],['string','Penelusuran string']])}</div>${c.mode === 'number' ? `<div class="settings-grid two">${field('initial','Nilai awal i')}${field('operator','Kondisi','select',[['<','<'],['<=','<='],['>','>'],['>=','>=']])}${field('compare','Nilai pembanding')}${field('change','Operasi','select',[['add','Tambah (+)'],['subtract','Kurang (−)']])}${field('amount','Besar perubahan')}</div>` : `<div class="settings-grid">${field('text','Teks','textarea',null,true)}</div>`}`;
   if (tab === 'nested') els['settings-fields'].innerHTML = sourceFields('outer', c.outerMode, 'Loop luar · i') + sourceFields('inner', c.innerMode, 'Loop dalam · j');
   els['settings-fields'].querySelectorAll('[data-key]').forEach(input => { input.value = c[input.dataset.key]; });
-  els['input-hint'].textContent = tab === 'while' ? (c.mode === 'string' ? 'Indeks dimulai dari 0. Spasi dan baris baru dihitung sebagai karakter.' : 'Kondisi akan diperiksa lagi setelah i berubah. Simulasi dibatasi agar tetap responsif.') : 'Stop pada range() tidak ikut dihasilkan. Spasi pada kartu ditampilkan sebagai ␠.';
 }
 function validateInteger(raw, key, errors, positive = false, nonzero = false) {
   const n = safeNumber(raw);
@@ -244,7 +239,7 @@ function makeIterator() {
 function stopTimer() { playing = false; if (timer !== null) { clearTimeout(timer); timer = null; } }
 function resetSimulation() {
   stopTimer(); stepNumber = 0; currentLine = -1;
-  currentMessage = 'Atur input, lalu jalankan simulasi untuk melihat alurnya.';
+  currentMessage = 'Pilih input, lalu jalankan simulasi.';
   validation = validate(); renderErrors(); machine = createMachine();
   iterator = Object.keys(validation.errors).length ? null : makeIterator();
   status = iterator ? 'ready' : 'invalid';
@@ -278,7 +273,7 @@ function step() { if (playing) pause(); runStep(); }
 function addText(parent, tag, text, className = '') {
   const element = document.createElement(tag); element.textContent = text; if (className) element.className = className; parent.append(element); return element;
 }
-function sourcePanel(source, key, title, active, processed, extra = '') {
+function sourcePanel(source, key, title, active, processed) {
   const panel = document.createElement('div'); panel.className = `source-panel ${key}`;
   const head = addText(panel, 'div', '', 'source-head');
   addText(head, 'strong', title);
@@ -289,12 +284,12 @@ function sourcePanel(source, key, title, active, processed, extra = '') {
     source.values.forEach((value, index) => {
       const state = index === active ? 'active' : index < processed ? 'done' : 'pending';
       const card = addText(cards, 'div', '', `item-card ${state}`);
+      if (source.indexed) addText(card, 'span', `indeks ${index}`, 'item-index');
       addText(card, 'span', cardValue(value), 'value');
       addText(card, 'span', state === 'active' ? 'Sedang aktif' : state === 'done' ? 'Selesai' : 'Menunggu', 'card-state');
     });
   }
   if (source.kind === 'number' && source.stop !== null) addText(panel, 'div', `Stop = ${source.stop} · batas berhenti, tidak ikut dihasilkan`, 'stop-marker');
-  if (extra) addText(panel, 'div', extra, 'stop-marker');
   if (source.truncated) addText(panel, 'p', `Sumber lebih dari ${MAX_ITEMS} nilai. Simulasi berhenti pada batas.`, 'limit-note');
   return panel;
 }
@@ -302,18 +297,14 @@ function renderVisual() {
   els.visual.replaceChildren();
   const c = configs[tab], s = validation.sources;
   if (tab === 'for') {
-    addText(els.visual, 'p', c.mode === 'string' ? 'Setiap kartu adalah satu karakter. ␠ = spasi, ↵ = baris baru, ⇥ = tab.' : 'Nilai range() diambil berurutan. Stop adalah batas, bukan kartu.', 'visual-intro');
     els.visual.append(sourcePanel(s.main,'main',c.mode === 'string' ? 'Karakter dalam teks' : 'Nilai dari range()',machine.active.main,machine.processed.main));
   } else if (tab === 'nested') {
-    addText(els.visual, 'p', 'Biru: loop luar i. Jingga: loop dalam j. Loop dalam kembali ke awal setiap kali i berganti.', 'visual-intro');
     els.visual.append(sourcePanel(s.outer,'outer','Loop luar · i',machine.active.outer,machine.processed.outer));
     els.visual.append(sourcePanel(s.inner,'inner','Loop dalam · j',machine.active.inner,machine.processed.inner));
   } else if (c.mode === 'string') {
-    const source = { kind:'string',values:Array.from(c.text).slice(0,MAX_ITEMS),truncated:Array.from(c.text).length>MAX_ITEMS };
-    addText(els.visual, 'p', 'Indeks dimulai dari 0. Setiap pemeriksaan membandingkan indeks dengan panjang teks.', 'visual-intro');
+    const source = { kind:'string',values:Array.from(c.text).slice(0,MAX_ITEMS),truncated:Array.from(c.text).length>MAX_ITEMS,indexed:true };
     els.visual.append(sourcePanel(source,'main','Karakter teks',machine.active.main,machine.processed.main));
   } else {
-    addText(els.visual, 'p', 'Urutan: inisialisasi → cek kondisi → print → ubah i → cek lagi.', 'visual-intro');
     const panel = document.createElement('div'); panel.className = 'source-panel main';
     addText(panel, 'strong', 'Nilai i yang diperiksa');
     if (!machine.history.length) addText(panel,'div','Belum ada pemeriksaan kondisi.','empty-source');
@@ -329,25 +320,8 @@ function renderVisual() {
   }
   if (machine.condition) addText(els.visual, 'div', `${machine.condition.expression} → ${machine.condition.result ? 'True' : 'False'}`, `condition-box ${machine.condition.result ? 'true' : 'false'}`);
 }
-function variable(label, value, isString = false) {
-  const box = addText(els.variables, 'div', '', 'variable');
-  addText(box,'span',label,'name');
-  addText(box,'span',value === undefined ? 'belum ada' : shown(value,isString),`val${value === undefined ? ' empty' : ''}`);
-}
-function counter(label, value) {
-  const box = addText(els.counters,'div','','counter'); addText(box,'span',label); addText(box,'strong',String(value));
-}
-function renderState() {
-  els.variables.replaceChildren(); els.counters.replaceChildren();
-  const c = configs[tab], v = machine.vars, count = machine.counters;
-  if (tab === 'for') { variable(c.mode === 'string' ? 'karakter' : 'i',v[c.mode === 'string' ? 'karakter' : 'i'],c.mode === 'string'); counter('Jumlah iterasi',count.iter); counter('Total print',count.prints); }
-  else if (tab === 'while' && c.mode === 'number') { variable('i',v.i); counter('Jumlah iterasi',count.iter); counter('Total print',count.prints); }
-  else if (tab === 'while') { variable('teks',v.teks,true); variable('indeks',v.indeks); variable('len(teks)',v.teks === undefined ? undefined : Array.from(v.teks).length); variable('karakter aktif',machine.active.main === null ? undefined : Array.from(v.teks)[machine.active.main],true); counter('Jumlah iterasi',count.iter); counter('Total print',count.prints); }
-  else { variable('i',v.i,c.outerMode === 'string'); variable('j',v.j,c.innerMode === 'string'); counter('Iterasi loop luar',count.outer); counter('Iterasi loop dalam saat ini',count.inner); counter('Total print',count.prints); }
-}
 function renderOutput() {
   els.output.replaceChildren();
-  els['output-count'].textContent = `${machine.outputs.length} kali`;
   if (!machine.outputs.length) addText(els.output,'div','Belum ada output.','output-empty');
   else machine.outputs.forEach((value,index) => {
     const row = addText(els.output,'div','','output-row'); addText(row,'span',String(index+1).padStart(2,'0'),'num'); addText(row,'span',value,'printed');
@@ -357,15 +331,13 @@ function renderOutput() {
 function renderStatus() {
   const labels = { ready:'Siap',playing:'Berjalan',paused:'Jeda',finished:'Pengulangan selesai',limited:'Batas simulasi tercapai',invalid:'Input perlu diperbaiki' };
   els.status.dataset.state = status; els['status-text'].textContent = labels[status];
-  els['explanation-text'].textContent = currentMessage; els['step-count'].textContent = `Langkah ${stepNumber}`;
+  els['step-description'].textContent = currentMessage;
   els.play.disabled = playing || !iterator || status === 'finished' || status === 'limited';
   els.pause.disabled = !playing;
   els.step.disabled = !iterator || status === 'finished' || status === 'limited';
 }
-function renderAll() { renderCode(); renderVisual(); renderState(); renderOutput(); renderStatus(); }
+function renderAll() { renderCode(); renderVisual(); renderOutput(); renderStatus(); }
 function updateTopic() {
-  const [kicker,title,description] = topics[tab];
-  els['topic-kicker'].textContent = kicker; els['topic-title'].textContent = title; els['topic-description'].textContent = description;
   els.workspace.setAttribute('aria-labelledby',`tab-${tab}`);
   document.querySelectorAll('.tab').forEach(button => { const selected = button.dataset.tab === tab; button.classList.toggle('active',selected); button.setAttribute('aria-selected',String(selected)); button.tabIndex = selected ? 0 : -1; });
 }

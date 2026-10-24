@@ -2,22 +2,8 @@
 
 Web interaktif berbahasa Indonesia untuk melihat alur `for`, `while`, dan nested loop Python, satu langkah logis setiap kali. Buka `index.html` langsung di browser. Tidak perlu instalasi, server, atau koneksi internet.
 
-## Cara memakai
+Pilih tab dan atur input di bagian atas kartu. Kode Python yang disorot, kartu nilai yang sedang diproses, dan output `print()` berada dalam tampilan yang sama. Gunakan **Langkah Berikutnya** untuk satu operasi, **Mulai / Lanjutkan** untuk menjalankan otomatis, **Jeda** untuk menahan posisi, dan **Reset** untuk kembali ke awal.
 
-1. Pilih tab dan atur input.
-2. Tekan **Langkah Berikutnya** untuk menjalankan satu operasi, atau **Mulai / Lanjutkan** untuk menjalankan otomatis.
-3. Gunakan **Jeda** untuk menahan posisi, **Reset** untuk mulai dari awal, dan **Kecepatan** untuk mengatur jeda animasi.
+Pada kartu string, ␠ berarti spasi, ↵ berarti baris baru, dan ⇥ berarti tab. Label teks tetap menunjukkan status nilai tanpa bergantung pada warna.
 
-Sorotan kode, kartu sumber, nilai variabel, penghitung, penjelasan, dan output mengikuti langkah yang sama. Pada string, satu kartu mewakili satu karakter. Simbol ␠, ↵, dan ⇥ membantu melihat spasi, baris baru, dan tab pada kartu.
-
-## Batas simulasi
-
-- Maksimal 60 nilai dari satu sumber angka atau string ditelusuri.
-- Maksimal 120 pelaksanaan `print()` dan 500 langkah.
-- Input teks maksimal 2.000 karakter.
-
-Jika batas tercapai, status menunjukkan **Batas simulasi tercapai**. Kode Python yang tampil hanya disimulasikan oleh JavaScript, bukan dijalankan oleh interpreter Python.
-
-## Arah tampilan
-
-Tampilan mengikuti kebutuhan proyeksi kelas: huruf besar, kontras kuat, panel kode gelap, dan kartu nilai yang memiliki label status tertulis. Hijau menandai nilai aktif pada loop tunggal; biru dan jingga membedakan loop luar dan loop dalam. Gerak dibatasi pada perpindahan status agar urutan eksekusi mudah diikuti.
+Simulasi dibatasi hingga 60 nilai per sumber, 120 pelaksanaan `print()`, dan 500 langkah. Input teks maksimal 2.000 karakter. Jika batas tercapai, status menunjukkan **Batas simulasi tercapai**. JavaScript menyimulasikan kode yang tampil tanpa interpreter Python.
