@@ -273,6 +273,10 @@ function step() { if (playing) pause(); runStep(); }
 function addText(parent, tag, text, className = '') {
   const element = document.createElement(tag); element.textContent = text; if (className) element.className = className; parent.append(element); return element;
 }
+function addOverflowMark(parent, label) {
+  const mark = addText(parent, 'span', '…', 'overflow-mark');
+  mark.setAttribute('aria-label', label);
+}
 function sourcePanel(source, key, title, active, processed) {
   const panel = document.createElement('div'); panel.className = `source-panel ${key}`;
   const head = addText(panel, 'div', '', 'source-head');
@@ -281,13 +285,19 @@ function sourcePanel(source, key, title, active, processed) {
   if (!source.values.length) addText(panel, 'div', 'Sumber kosong · 0 iterasi', 'empty-source');
   else {
     const cards = addText(panel, 'div', '', 'cards');
-    source.values.forEach((value, index) => {
+    const focus = active === null ? Math.min(processed, source.values.length - 1) : active;
+    const first = Math.max(0, Math.min(source.values.length - 3, focus - 1));
+    const last = Math.min(source.values.length, first + 3);
+    if (first > 0) addOverflowMark(cards, 'Ada nilai sebelumnya yang tidak ditampilkan');
+    for (let index = first; index < last; index++) {
+      const value = source.values[index];
       const state = index === active ? 'active' : index < processed ? 'done' : 'pending';
       const card = addText(cards, 'div', '', `item-card ${state}`);
       if (source.indexed) addText(card, 'span', `indeks ${index}`, 'item-index');
       addText(card, 'span', cardValue(value), 'value');
       addText(card, 'span', state === 'active' ? 'Sedang aktif' : state === 'done' ? 'Selesai' : 'Menunggu', 'card-state');
-    });
+    }
+    if (last < source.values.length) addOverflowMark(cards, 'Ada nilai berikutnya yang tidak ditampilkan');
   }
   if (source.kind === 'number' && source.stop !== null) addText(panel, 'div', `Stop = ${source.stop} · batas berhenti, tidak ikut dihasilkan`, 'stop-marker');
   if (source.truncated) addText(panel, 'p', `Sumber lebih dari ${MAX_ITEMS} nilai. Simulasi berhenti pada batas.`, 'limit-note');
@@ -310,7 +320,8 @@ function renderVisual() {
     if (!machine.history.length) addText(panel,'div','Belum ada pemeriksaan kondisi.','empty-source');
     else {
       const cards = addText(panel,'div','','cards');
-      machine.history.forEach(entry => {
+      if (machine.history.length > 3) addOverflowMark(cards, 'Ada pemeriksaan sebelumnya yang tidak ditampilkan');
+      machine.history.slice(-3).forEach(entry => {
         const card = addText(cards,'div','',`item-card ${entry.state === 'false' ? 'done' : entry.state}`);
         addText(card,'span',String(entry.value),'value');
         addText(card,'span',entry.state === 'false' ? 'False · berhenti' : entry.state === 'done' ? 'Selesai' : 'Sedang aktif','card-state');
@@ -323,8 +334,8 @@ function renderVisual() {
 function renderOutput() {
   els.output.replaceChildren();
   if (!machine.outputs.length) addText(els.output,'div','Belum ada output.','output-empty');
-  else machine.outputs.forEach((value,index) => {
-    const row = addText(els.output,'div','','output-row'); addText(row,'span',String(index+1).padStart(2,'0'),'num'); addText(row,'span',value,'printed');
+  else machine.outputs.forEach(value => {
+    const row = addText(els.output,'div','','output-row'); addText(row,'span',value,'printed');
   });
   els.output.scrollTop = els.output.scrollHeight;
 }

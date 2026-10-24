@@ -12,21 +12,17 @@
 <body>
   <main class="app">
     <section class="visualizer" id="workspace" role="tabpanel" aria-labelledby="tab-for">
-      <header class="card-header">
-        <h1>Python Loop Visualizer</h1>
-        <div class="status" id="status" role="status" aria-live="polite"><span class="status-dot" aria-hidden="true"></span><span id="status-text">Siap</span></div>
-      </header>
       <nav class="tabs" role="tablist" aria-label="Jenis loop">
         <button class="tab active" id="tab-for" type="button" role="tab" aria-selected="true" aria-controls="workspace" data-tab="for">For Loop</button>
         <button class="tab" id="tab-while" type="button" role="tab" aria-selected="false" aria-controls="workspace" data-tab="while" tabindex="-1">While Loop</button>
         <button class="tab" id="tab-nested" type="button" role="tab" aria-selected="false" aria-controls="workspace" data-tab="nested" tabindex="-1">Nested Loop</button>
       </nav>
       <section class="settings" aria-label="Input simulasi"><div id="settings-fields"></div></section>
+      <section class="controls" aria-label="Kontrol simulasi"><div class="control-buttons"><button class="button primary" type="button" id="play">Mulai / Lanjutkan</button><button class="button" type="button" id="step">Langkah Berikutnya</button><button class="button" type="button" id="pause">Jeda</button><button class="button" type="button" id="reset">Reset</button></div><div class="control-meta"><div class="status" id="status" role="status" aria-live="polite"><span class="status-dot" aria-hidden="true"></span><span id="status-text">Siap</span></div><label class="speed-control" for="speed">Kecepatan <select id="speed"><option value="1400">Lambat</option><option value="850" selected>Sedang</option><option value="400">Cepat</option></select></label></div></section>
       <div class="stage">
-        <section class="code-side" aria-labelledby="code-title"><h2 id="code-title">Kode Python</h2><div class="code-wrap"><div class="code-lines" id="code" aria-label="Kode Python"></div></div></section>
+        <section class="code-side" aria-labelledby="code-title"><h1 id="code-title">Kode Python</h1><div class="code-wrap"><div class="code-lines" id="code" aria-label="Kode Python"></div></div></section>
         <section class="result-side" aria-labelledby="result-title"><h2 id="result-title">Hasil eksekusi</h2><p class="step-description" id="step-description" aria-live="polite">Pilih input, lalu jalankan simulasi.</p><div id="visual"></div><div class="output-area"><h3>Output print()</h3><div id="output" class="output" aria-live="polite"></div></div></section>
       </div>
-      <section class="controls" aria-label="Kontrol simulasi"><div class="control-buttons"><button class="button primary" type="button" id="play">Mulai / Lanjutkan</button><button class="button" type="button" id="pause">Jeda</button><button class="button" type="button" id="step">Langkah Berikutnya</button><button class="button" type="button" id="reset">Reset</button></div><label class="speed-control" for="speed">Kecepatan <select id="speed"><option value="1400">Lambat</option><option value="850" selected>Sedang</option><option value="400">Cepat</option></select></label></section>
     </section>
   </main>
 </body>
