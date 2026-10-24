@@ -52,6 +52,19 @@ h1, h2 { font-size: 1rem; margin: 0 0 14px; }
 .error { margin: 2px 0 0; color: #922920; font-size: .7rem; font-weight: 800; }
 .error:empty { display: none; }
 
+@supports (appearance: base-select) and selector(::picker(select)) {
+  .field select, .speed-control select, ::picker(select) { appearance: base-select; }
+  .field select, .speed-control select { background-image: none; }
+  .field select:open, .speed-control select:open { border-color: var(--green); background-color: var(--green-soft); }
+  .field select::picker-icon, .speed-control select::picker-icon { color: var(--green); transition: rotate .15s ease; }
+  .field select:open::picker-icon, .speed-control select:open::picker-icon { rotate: 180deg; }
+  ::picker(select) { min-width: anchor-size(width); padding: 5px; border: 2px solid var(--line); border-radius: 8px; background: #fff; color: var(--ink); box-shadow: 0 8px 20px rgb(28 41 34 / 16%); }
+  .field select option, .speed-control select option { min-height: 40px; padding: 9px 12px; border-radius: 5px; background: #fff; color: var(--ink); }
+  .field select option:hover, .speed-control select option:hover { background: var(--green-soft); color: var(--green); }
+  .field select option:checked, .speed-control select option:checked { background: var(--green); color: #fff; font-weight: 800; }
+  .field select option::checkmark, .speed-control select option::checkmark { color: #fff; }
+}
+
 .controls { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding: 15px 28px; border-bottom: 1px solid var(--line); background: #f8faf8; }
 .control-buttons, .control-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .control-meta { gap: 18px; }
