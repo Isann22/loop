@@ -64,9 +64,9 @@ h1, h2 { font-size: 1rem; margin: 0 0 14px; }
 .speed-control { display: flex; align-items: center; gap: 9px; color: var(--muted); font-size: .75rem; font-weight: 800; }
 .speed-control select { min-height: 45px; border: 2px solid var(--line); border-radius: 5px; background: #fff; color: var(--ink); padding: 7px; }
 
-.stage { display: grid; grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr); min-height: 390px; }
-.code-side, .result-side { min-width: 0; padding: 24px 28px; }
-.code-side { border-right: 1px solid var(--line); }
+.stage { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, .85fr); min-height: 390px; }
+.code-side, .result-side, .print-side { min-width: 0; padding: 24px 22px; }
+.code-side, .result-side { border-right: 1px solid var(--line); }
 .code-wrap { min-height: 170px; border-radius: 6px; background: #202c27; color: #f6fbf6; overflow: auto; padding: 15px 0; }
 .code-line { display: grid; grid-template-columns: 30px minmax(max-content, 1fr); gap: 13px; padding: 5px 15px; border-left: 5px solid transparent; font: 1.08rem/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; white-space: pre; }
 .code-line.active { background: #365341; border-left-color: #c6ecae; }
@@ -78,12 +78,19 @@ h1, h2 { font-size: 1rem; margin: 0 0 14px; }
 .active-slot.empty { color: #5c6e61; }
 .active-name { font-size: .85rem; font-weight: 800; }
 .active-number { max-width: 100%; font: 800 clamp(3.6rem, 7vw, 6rem)/1.1 ui-monospace, SFMono-Regular, Consolas, monospace; overflow-wrap: anywhere; }
-.active-values:has(.active-slot:nth-child(2)) .active-number { font-size: clamp(2.7rem, 5vw, 4.6rem); }
+.active-values:has(.active-slot:nth-child(2)) .active-slot { padding: 12px; }
+.active-values:has(.active-slot:nth-child(2)) .active-number { font-size: clamp(2.3rem, 3vw, 3.5rem); }
 .step-description { margin: 15px 0 0; color: var(--muted); font-size: .88rem; font-weight: 700; overflow-wrap: anywhere; }
+.print-focus { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; min-height: 220px; min-width: 0; padding: 18px; border: 2px solid var(--line); border-radius: 8px; background: #f3f6f3; text-align: center; }
+.print-focus.active { border-color: var(--green); background: var(--green-soft); }
+.print-label { color: var(--muted); font-size: .82rem; font-weight: 800; }
+.print-focus.active .print-label { color: var(--green); }
+.print-value { max-width: 100%; font: 800 clamp(2.7rem, 4vw, 4.5rem)/1.1 ui-monospace, SFMono-Regular, Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+.print-focus.active .print-value { color: var(--green); }
 
-@media (max-width: 840px) {
+@media (max-width: 980px) {
   .stage { grid-template-columns: 1fr; min-height: 0; }
-  .code-side { border-right: 0; border-bottom: 1px solid var(--line); }
+  .code-side, .result-side { border-right: 0; border-bottom: 1px solid var(--line); }
   .code-wrap { min-height: 150px; }
   .nested-settings { grid-template-columns: 1fr; gap: 12px; }
   .nested-settings .setting-group + .setting-group { padding: 12px 0 0; border-left: 0; border-top: 1px solid #d5ded5; }
@@ -95,7 +102,7 @@ h1, h2 { font-size: 1rem; margin: 0 0 14px; }
   .status { font-size: .7rem; }
   .tabs { padding: 6px 10px 0; gap: 0; }
   .tab { flex: 1; padding: 8px 3px; font-size: .78rem; }
-  .settings, .code-side, .result-side, .controls { padding-left: 17px; padding-right: 17px; }
+  .settings, .code-side, .result-side, .print-side, .controls { padding-left: 17px; padding-right: 17px; }
   .settings-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .settings-grid .field:last-child:nth-child(odd) { grid-column: 1 / -1; }
   .control-buttons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
@@ -104,6 +111,7 @@ h1, h2 { font-size: 1rem; margin: 0 0 14px; }
   #play, #step { grid-column: 1 / -1; }
   .active-values:has(.active-slot:nth-child(2)) { flex-direction: column; }
   .active-values:has(.active-slot:nth-child(2)) .active-slot { min-height: 145px; }
+  .active-values:has(.active-slot:nth-child(2)) .active-number { font-size: 3.6rem; }
 }
 @media (prefers-reduced-motion: no-preference) {
   .tab, .button { transition: background-color .15s, border-color .15s, color .15s; }

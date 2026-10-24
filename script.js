@@ -11,7 +11,7 @@ const defaults = {
   nested: { outerMode: 'number', outerStart: '1', outerStop: '3', outerStep: '1', outerText: 'AB', innerMode: 'string', innerStart: '1', innerStop: '3', innerStep: '1', innerText: 'AB' }
 };
 const configs = structuredClone(defaults);
-const els = Object.fromEntries(['settings-fields','code','active-values','step-description','status','status-text','workspace','play','pause','step','reset','speed'].map(id => [id, document.getElementById(id)]));
+const els = Object.fromEntries(['settings-fields','code','active-values','print-focus','print-label','print-value','step-description','status','status-text','workspace','play','pause','step','reset','speed'].map(id => [id, document.getElementById(id)]));
 let tab = 'for';
 let machine = null;
 let iterator = null;
@@ -292,6 +292,19 @@ function renderActiveValues() {
     activeSlot('j · loop dalam', machine.active.inner === null ? undefined : v.j, c.innerMode === 'string', 'inner');
   }
 }
+function printedText(value) {
+  if (value === '') return '∅';
+  if (value === ' ') return '␠';
+  return value.replace(/\n/g, '↵').replace(/\t/g, '⇥').replace(/\r/g, '⏎');
+}
+function renderPrint() {
+  const latest = machine.outputs.at(-1);
+  const printLine = tab === 'for' ? 1 : tab === 'nested' ? 2 : configs.while.mode === 'number' ? 2 : 3;
+  const active = latest !== undefined && currentLine === printLine;
+  els['print-focus'].classList.toggle('active', active);
+  els['print-label'].textContent = latest === undefined ? 'Belum ada output' : active ? 'Dicetak sekarang' : 'Terakhir dicetak';
+  els['print-value'].textContent = latest === undefined ? '—' : printedText(latest);
+}
 function renderStatus() {
   const labels = { ready:'Siap',playing:'Berjalan',paused:'Jeda',finished:'Pengulangan selesai',limited:'Batas simulasi tercapai',invalid:'Input perlu diperbaiki' };
   els.status.dataset.state = status; els['status-text'].textContent = labels[status];
@@ -300,7 +313,7 @@ function renderStatus() {
   els.pause.disabled = !playing;
   els.step.disabled = !iterator || status === 'finished' || status === 'limited';
 }
-function renderAll() { renderCode(); renderActiveValues(); renderStatus(); }
+function renderAll() { renderCode(); renderActiveValues(); renderPrint(); renderStatus(); }
 function updateTopic() {
   els.workspace.setAttribute('aria-labelledby',`tab-${tab}`);
   document.querySelectorAll('.tab').forEach(button => { const selected = button.dataset.tab === tab; button.classList.toggle('active',selected); button.setAttribute('aria-selected',String(selected)); button.tabIndex = selected ? 0 : -1; });
