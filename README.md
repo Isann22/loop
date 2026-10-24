@@ -7,3 +7,5 @@ Pilih tab dan atur input di bagian atas kartu. Kontrol berada tepat di bawah inp
 Gunakan **Langkah Berikutnya** untuk satu operasi, **Mulai / Lanjutkan** untuk menjalankan otomatis, **Jeda** untuk menahan posisi, dan **Reset** untuk kembali ke awal. Simulasi dibatasi hingga 60 nilai per sumber, 120 pelaksanaan `print()`, dan 500 langkah. Input teks maksimal 2.000 karakter. Jika batas tercapai, status menunjukkan **Batas simulasi tercapai**.
 
 JavaScript menyimulasikan kode yang tampil tanpa interpreter Python.
+
+Favicon memakai [logo resmi Python](https://www.python.org/community/logos/). “Python” dan logo Python adalah merek dagang Python Software Foundation; proyek ini tidak berafiliasi dengan PSF.
